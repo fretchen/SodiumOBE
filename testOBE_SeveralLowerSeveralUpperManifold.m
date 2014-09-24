@@ -5,13 +5,13 @@ clear all;
 Elf = 20*[1 0 1];
 
 % the lower manifold
-lowFStates = [1];
-deltaLowFStates = [0];
+lowFStates = [1 2];
+deltaLowFStates = [0 180];
 
 % the upper manifold on the D2 line
 %
-upperFStates = [0];
-deltaUpperFStates = [0];
+upperFStates = [1 2];
+deltaUpperFStates = [0 18];
 %}
 
 % the upper manifold on the D1 line
@@ -36,7 +36,7 @@ Coupling = zeros(Nlevel);
 
 % the dipole matrix element we normalize too
 %normEl = abs(dipoleMatrixEl(2,3,-2,-3,1));
-normEl = sqrt(3);
+normEl = 1;
 
 for lFInd=1:NlowF
     F = lowFStates(lFInd);
@@ -84,7 +84,6 @@ H = Coupling+En;
 Gamma = zeros(Nlevel^2);
 
 % upper lifetime
-
 for lFInd=1:NlowF
     F = lowFStates(lFInd);
     sInd = lowFStateStartInd(lowFStates,lFInd);
@@ -100,9 +99,6 @@ for lFInd=1:NlowF
                 lGind = returnDensityEvInd(ii,ii,Nlevel);
                 uGind = returnDensityEvInd(jj,jj,Nlevel);
                 if DecayAmplitude(F,Fp,mF,mFp)
-                    disp('I can decay')
-                    disp([ mF mFp])
-
                     Gamma(lGind,uGind) = DecayAmplitude(F,Fp,mF,mFp,normEl);
                     Gamma(uGind,uGind) = Gamma(uGind,uGind) - DecayAmplitude(F,Fp,mF,mFp,normEl);
                 end
@@ -124,7 +120,7 @@ for lFInd=1:NlowF
         eFInd = upperFStateEndInd(upperFStates,NlowTotal,uFInd);
         for ii=sInd:eInd
             for jj = sFInd:eFInd
-                invLT = -Gamma(returnDensityEvInd(jj,jj,Nlevel),returnDensityEvInd(jj,jj,Nlevel));
+                invLT = -Gamma(returnDensityEvInd(jj,jj,Nlevel),returnDensityEvInd(jj,jj,Nlevel))
                 Gamma(returnDensityEvInd(ii,jj,Nlevel),returnDensityEvInd(ii,jj,Nlevel)) =-invLT/2;
                 Gamma(returnDensityEvInd(jj,ii,Nlevel),returnDensityEvInd(jj,ii,Nlevel)) =-invLT/2;
                 
@@ -151,14 +147,10 @@ for jj=1:Nlevel
 end
 
 Ntot = sum(pop,1);
-figure(1)
-plot(t,Ntot,'ro')
 
-figure(2)
-clf;
 %% plot it
 figure(1)
-plot(t,Ntot,'ro')
+plot(t,real(Ntot),'ro')
 
 figure(2)
 
@@ -181,7 +173,7 @@ for lFInd =1:NlowF
         end
         ll=ll+1;
     end
-    plot(t,y(:,ve))
+    plot(t,real(y(:,ve)))
     ylabel('Populations')
     legend(M)
   %  ylim([0 1]);
@@ -205,7 +197,7 @@ for uFInd =1:NupperF
         end
         ll=ll+1;
     end
-    plot(t,y(:,ve))
+    plot(t,real(y(:,ve)))
     ylabel('Populations')
     legend(M)
 %    ylim([0 1]);
