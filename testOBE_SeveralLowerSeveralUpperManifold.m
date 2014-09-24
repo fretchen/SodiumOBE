@@ -2,22 +2,23 @@ clear all;
 
 % the electric field and the coupling strength
 
-Elf = 20*[0 0 1];
+Elf = 20*[1 0 1];
 
 % the lower manifold
-lowFStates = [1 2];
-deltaLowFStates = [0 180];
+lowFStates = [1];
+deltaLowFStates = [0];
 
 % the upper manifold on the D2 line
-%{
-upperFStates = [0 1 2 3];
-deltaUpperFStates = [0 1.5 5 11];
+%
+upperFStates = [0];
+deltaUpperFStates = [0];
 %}
 
 % the upper manifold on the D1 line
+%{
 upperFStates = [1 2];
 deltaUpperFStates = [0 18];
-
+%}
 tmax = 5;
 
 NlowF = length(lowFStates);
@@ -33,6 +34,10 @@ NManifolds = NlowF +NupperF;
 %% construct the coupling matrix
 Coupling = zeros(Nlevel);
 
+% the dipole matrix element we normalize too
+%normEl = abs(dipoleMatrixEl(2,3,-2,-3,1));
+normEl = sqrt(3);
+
 for lFInd=1:NlowF
     F = lowFStates(lFInd);
     sInd = lowFStateStartInd(lowFStates,lFInd);
@@ -45,7 +50,7 @@ for lFInd=1:NlowF
             mF = ii-(sInd-1)-(F+1);
             for jj = sFInd:eFInd
                 mFp = jj-(sFInd-1)-(Fp+1);
-                C = getCouplingForAllPolarizations(Elf, F,Fp, mF,mFp);
+                C = getCouplingForAllPolarizations(Elf, F,Fp, mF,mFp,normEl);
                 Coupling(ii,jj) = C;
                 Coupling(jj,ii) = C;
             end
@@ -79,7 +84,6 @@ H = Coupling+En;
 Gamma = zeros(Nlevel^2);
 
 % upper lifetime
-invLT = 1;
 
 for lFInd=1:NlowF
     F = lowFStates(lFInd);
@@ -95,30 +99,12 @@ for lFInd=1:NlowF
                 mFp = jj-(sFInd-1)-(Fp+1);               
                 lGind = returnDensityEvInd(ii,ii,Nlevel);
                 uGind = returnDensityEvInd(jj,jj,Nlevel);
-                Gamma(lGind,uGind) = DecayAmplitude(F,Fp,mF,mFp);
-                Gamma(uGind,uGind) = Gamma(uGind,uGind) - DecayAmplitude(F,Fp,mF,mFp);
-            end
-        end
-    end
-end
-sum(sum(Gamma))
+                if DecayAmplitude(F,Fp,mF,mFp)
+                    disp('I can decay')
+                    disp([ mF mFp])
 
-% normalize the lifetime
-for uFInd = 1:NupperF
-    sFInd = upperFStateStartInd(upperFStates,NlowTotal,uFInd);
-    eFInd = upperFStateEndInd(upperFStates,NlowTotal,uFInd);
-    uGind = returnDensityEvInd(sFInd,sFInd,Nlevel);
-    uFlt = Gamma(uGind,uGind);
-    if uFlt
-        for jj=sFInd:eFInd
-            uGind = returnDensityEvInd(jj,jj,Nlevel);
-            Gamma(uGind,uGind) = Gamma(uGind,uGind)/abs(uFlt)*invLT;
-            for lFInd=1:NlowF
-                sInd = lowFStateStartInd(lowFStates,lFInd);
-                eInd = lowFStateEndInd(lowFStates,lFInd);
-                for ii=sInd:eInd
-                    lGind = returnDensityEvInd(ii,ii,Nlevel);
-                    Gamma(lGind,uGind) = Gamma(lGind,uGind)/abs(uFlt)*invLT;
+                    Gamma(lGind,uGind) = DecayAmplitude(F,Fp,mF,mFp,normEl);
+                    Gamma(uGind,uGind) = Gamma(uGind,uGind) - DecayAmplitude(F,Fp,mF,mFp,normEl);
                 end
             end
         end
@@ -138,7 +124,9 @@ for lFInd=1:NlowF
         eFInd = upperFStateEndInd(upperFStates,NlowTotal,uFInd);
         for ii=sInd:eInd
             for jj = sFInd:eFInd
+                invLT = -Gamma(returnDensityEvInd(jj,jj,Nlevel),returnDensityEvInd(jj,jj,Nlevel));
                 Gamma(returnDensityEvInd(ii,jj,Nlevel),returnDensityEvInd(ii,jj,Nlevel)) =-invLT/2;
+                Gamma(returnDensityEvInd(jj,ii,Nlevel),returnDensityEvInd(jj,ii,Nlevel)) =-invLT/2;
                 
             end
         end
@@ -171,6 +159,7 @@ clf;
 %% plot it
 figure(1)
 plot(t,Ntot,'ro')
+
 figure(2)
 
 clf;
@@ -195,9 +184,9 @@ for lFInd =1:NlowF
     plot(t,y(:,ve))
     ylabel('Populations')
     legend(M)
-    ylim([0 1]);
+  %  ylim([0 1]);
     grid on
-    clear M;
+    clear M ve;
 end
 
 for uFInd =1:NupperF
@@ -219,7 +208,7 @@ for uFInd =1:NupperF
     plot(t,y(:,ve))
     ylabel('Populations')
     legend(M)
-    ylim([0 1]);
+%    ylim([0 1]);
     grid on
     clear M;
 end
