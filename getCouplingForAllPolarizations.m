@@ -10,6 +10,9 @@ p.addRequired('mF', @(x)isnumeric(x));
 p.addRequired('mFp', @(x)isnumeric(x));
 
 p.addOptional('dMEnorm', 1, @(x)isnumeric(x));
+p.addParamValue('J', 1/2, @(x)isnumeric(x));
+p.addParamValue('Jp', 1/2, @(x)isnumeric(x));
+p.addParamValue('I', 3/2, @(x)isnumeric(x));
 
 parse(p,varargin{:});
 
@@ -21,7 +24,10 @@ mF = p.Results.mF;
 mFp = p.Results.mFp;
 
 dMEnorm = p.Results.dMEnorm;
+J = p.Results.J;
+Jp = p.Results.Jp;
+I = p.Results.I;
 
 for q = -1:1
-    C = C+ Elf(q+2)*dipoleMatrixEl(F,Fp,mF,mFp,q)./dMEnorm;
+    C = C+ Elf(q+2)*dipoleMatrixEl(F,Fp,mF,mFp,q, J, Jp, 'I', I)./dMEnorm;
 end
