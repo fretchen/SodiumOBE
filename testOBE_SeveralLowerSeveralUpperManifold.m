@@ -8,17 +8,10 @@ Elf = 20*[1 0 1];
 lowFStates = [1 2];
 deltaLowFStates = [0 180];
 
-% the upper manifold on the D2 line
-%
+% the upper manifold
 upperFStates = [1 2];
 deltaUpperFStates = [0 18];
-%}
 
-% the upper manifold on the D1 line
-%{
-upperFStates = [1 2];
-deltaUpperFStates = [0 18];
-%}
 tmax = 5;
 
 NlowF = length(lowFStates);

@@ -2,7 +2,7 @@ clear all;
 
 %% Parameters for the simulation
 % the electric field and the coupling strength
-Elf = 4*[0 0 1];%s- pi and s+
+Elf = 4*[1 1 1];%s- pi and s+
 
 % how long do we look at it
 tmax = 20;
@@ -21,7 +21,7 @@ debug = 0;% if you want to debug things
 lowFStates = [1 2];
 deltaLowFStates = [0 180];
 
-%
+% upper mF states
 upperFStates = [0 1 2 3];
 deltaUpperFStates = [-1.6 0 3.4 10] + Detun;
 
@@ -46,7 +46,7 @@ normEl = 1/sqrt(2);
 
 Coupling = constructCouplingMatrix(Elf,lowFStates,upperFStates, normEl, J, Jp);
 En = constructEnergyMatrix(lowFStates,upperFStates,deltaLowFStates, deltaUpperFStates);
-Gamma = constructLossMatrix(lowFStates,upperFStates,normEl, J, Jp);
+Gamma = constructLossMatrix(lowFStates,upperFStates,normEl, J, Jp, 'debug', debug);
 H = Coupling+En;
 
 %% initialize into the right state
