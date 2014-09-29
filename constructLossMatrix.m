@@ -1,6 +1,6 @@
 function Gamma = constructLossMatrix(varargin)
 %% constructs the loss matrix for the OBE
-%% !!!!! be careful the lifetime of the upper states is supposed to be one
+%% we suppose that all excited states have the same lifetime of 1
 p = inputParser;
 
 p.addRequired('lowFStates', @(x)isnumeric(x));
@@ -33,7 +33,7 @@ Nlevel = NlowTotal+NupperTotal;
 
 Gamma = zeros(Nlevel^2);
 
-% upper lifetime
+% branching ratio
 for lFInd=1:NlowF
     F = lowFStates(lFInd);
     sInd = lowFStateStartInd(lowFStates,lFInd);
@@ -45,39 +45,37 @@ for lFInd=1:NlowF
         for ii=sInd:eInd
             mF = ii-(sInd-1)-(F+1);
             for jj = sFInd:eFInd
-                mFp = jj-(sFInd-1)-(Fp+1);               
+                mFp = jj-(sFInd-1)-(Fp+1);
                 lGind = returnDensityEvInd(ii,ii,Nlevel);
                 uGind = returnDensityEvInd(jj,jj,Nlevel);
                 amp = DecayAmplitude(F,Fp,mF,mFp,normEl,...
                     'J', J, 'Jp', Jp, 'I', I);
-                if amp
-                    Gamma(lGind,uGind) = amp;
-                    Gamma(uGind,uGind) = Gamma(uGind,uGind) - amp;
-                end
+                Gamma(lGind,uGind) = amp;
             end
         end
     end
 end
 
-% now the lifetime of the coherences
-for ii=1:Nlevel
-    for jj = 1:Nlevel
-        if ii-jj
-            ind = returnDensityEvInd(ii,jj,Nlevel);
-            Gamma(ind,ind) =-1/2;
-        end
+% lifetime of the upper states
+for ii=NlowTotal+1:Nlevel
+    for jj=NlowTotal+1:Nlevel
+        ind1 = returnDensityEvInd(ii,jj,Nlevel);
+        ind2 = returnDensityEvInd(jj,ii,Nlevel);
+        Gamma(ind1,ind1) = -1;
+        Gamma(ind2,ind2) = -1;   
     end
 end
 
-for uFInd = 1:NupperF
-    sFInd = upperFStateStartInd(upperFStates,NlowTotal,uFInd);
-    
-    invLT = -Gamma(returnDensityEvInd(sFInd,sFInd,Nlevel),returnDensityEvInd(sFInd,sFInd,Nlevel));
-    if abs(invLT-1)>1e-12
-        disp(invLT-1)
-        error('The upper lifetime has to be equal too one for the moment.');
+% now the lifetime of the coherences between upper and lower dudes    
+for ii=1:NlowTotal
+    for jj=NlowTotal+1:Nlevel
+        ind1 = returnDensityEvInd(ii,jj,Nlevel);
+        ind2 = returnDensityEvInd(jj,ii,Nlevel);
+        Gamma(ind1,ind1) = -1/2;
+        Gamma(ind2,ind2) = -1/2;   
     end
 end
+
 
 if debug
     for uFInd = 1:NupperF

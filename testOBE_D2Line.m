@@ -2,7 +2,7 @@ clear all;
 
 %% Parameters for the simulation
 % the electric field and the coupling strength
-Elf = 4*[1 1 1];%s- pi and s+
+Elf = 4*[0 0 1];%s- pi and s+
 
 % how long do we look at it
 tmax = 20;

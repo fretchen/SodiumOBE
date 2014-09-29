@@ -15,7 +15,7 @@ Detun = -18;% energies are measured in linewidths
 FstartInd = 1;
 mFstart = -1;
 
-debug = 0;
+debug = 1;
 %% define the energy structure
 
 % the lower manifold
@@ -36,7 +36,7 @@ normEl = 1;
 
 Coupling = constructCouplingMatrix(Elf,lowFStates,upperFStates, normEl, J, Jp);
 En = constructEnergyMatrix(lowFStates,upperFStates,deltaLowFStates, deltaUpperFStates);
-Gamma = constructLossMatrix(lowFStates,upperFStates,normEl, J, Jp);
+Gamma = constructLossMatrix(lowFStates,upperFStates,normEl, J, Jp, 'debug', debug);
 
 H = Coupling+En;
 
